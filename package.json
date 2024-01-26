@@ -1,0 +1,14 @@
+{
+    "name": "inds-datamerge",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "concurrently \"cd ./inds-backend && npm run server\" \" cd ./inds-frontend && npm run dev\" \"redis-server\""
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "concurrently": "^8.2.2"
+    }
+}
