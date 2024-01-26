@@ -1,0 +1,13 @@
+node_modules
+.env
+dump.rdb
+.DS_Store
+inds-backend/node_modules
+inds-backend/.env
+inds-backend/.DS_Store
+inds-backend/uploads/*
+
+inds-frontend/node_modules
+inds-frontend/.env
+inds-frontend/.DS_Store
+
