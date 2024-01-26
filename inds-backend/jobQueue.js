@@ -2,15 +2,15 @@ require('dotenv').config()
 
 const Queue = require('bull');
 const myQueue = new Queue('indsQueue');
+const { XMLParser } = require('fast-xml-parser')
 
 
 myQueue.process((job, done) => {
 
     console.log("Building XML:")
-    const scriptPath = job.data.scriptPath;
-    const zipFile = process.env.SERVER_PATH + job.data.files[1].filename
-    const csvFile = process.env.SERVER_PATH + job.data.files[0].filename
-    console.log(scriptPath, zipFile, csvFile)
+    const zipFile = process.env.SERVER_PATH + job.data.zipFile.filename
+    // const csvFile = process.env.SERVER_PATH + job.data.files[0].filename
+    console.log(job.data.zipFile)
     let xml = `
     <?xml version="1.0" encoding="UTF-8"?>
     <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
@@ -25,10 +25,6 @@ myQueue.process((job, done) => {
                     <IDSP:scriptArgs>
                         <IDSP:name>zipFile</IDSP:name>
                         <IDSP:value>${zipFile}</IDSP:value>
-                    </IDSP:scriptArgs>
-                    <IDSP:scriptArgs>
-                        <IDSP:name>csvFile</IDSP:name>
-                        <IDSP:value>${csvFile}</IDSP:value>
                     </IDSP:scriptArgs>
                 </IDSP:runScriptParameters>
             </IDSP:RunScript>
@@ -49,7 +45,19 @@ myQueue.process((job, done) => {
         }
     }
     fetch('http://localhost:18383/service?wsdl', options)
-        .then(() => {
+        .then((res) => res.text())
+        .then((res) => {
+            // Response is XML SOAP that includes the names of the PDF output files
+            const parser = new XMLParser();
+            let pXml = parser.parse(res)
+            console.dir(pXml, { depth: null, colors: true })
+            let pdfFiles = pXml['SOAP-ENV:Envelope']['SOAP-ENV:Body']['IDSP:RunScriptResponse']
+                .scriptResult
+                .data
+                .item
+            pdfFiles = pdfFiles.map(obj => obj.data)
+            console.log(pdfFiles)
+            job.update({ ...job.data, pdfFiles: pdfFiles })
             job.progress = 100;
             done();
         })

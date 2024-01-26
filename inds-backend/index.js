@@ -11,10 +11,6 @@ const jsonParser = bodyParser.json()
 const multer = require('multer')
 
 const myQueue = require('./jobQueue')
-// myQueue.on('completed', (job, result) => {
-//     console.log("Job done:", job)
-// })
-// myQueue.empty(1000000)
 
 
 // Save files to disk
@@ -23,7 +19,8 @@ const storage = multer.diskStorage({
         cb(null, 'uploads/')
     },
     filename: function(_req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname));
+        console.log(file)
+        cb(null, `${Date.now()}_${file.originalname}`);
     }
 })
 
@@ -39,15 +36,13 @@ app.get('/', (_req, res) => {
     })
 })
 
-app.post('/api/upload', upload.array('file', 5), async (req, res) => {
+app.post('/api/upload', upload.single('zipFile'), async (req, res) => {
 
-    const pdfPath = req.files[1].filename.split(".")[0]
 
     const job = {
         jobId: req.body.uid,
         jobName: req.body.name,
-        files: req.files,
-        pdfPath: `${pdfPath}.pdf`
+        zipFile: req.file,
     }
     console.log("Sending to queue:", job);
 

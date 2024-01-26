@@ -39,15 +39,15 @@ const FileDialog = ({ showing, handleClose, handleSubmit, jobState, csv, inds })
                                 value={jobName}
                                 onChange={(e) => setJobName(e.target.value)} />
                         </Form.Group>
-                        <Form.Group controlId="formFileSm" className="mb-3">
-                            <Form.Label>Choose a CSV...</Form.Label>
-                            <Form.Control
-                                type="file"
-                                size="sm"
-                                accept=".csv"
-                                onChange={handleFile}
-                            />
-                        </Form.Group>
+                        {/* <Form.Group controlId="formFileSm" className="mb-3"> */}
+                        {/*     <Form.Label>Choose a CSV...</Form.Label> */}
+                        {/*     <Form.Control */}
+                        {/*         type="file" */}
+                        {/*         size="sm" */}
+                        {/*         accept=".csv" */}
+                        {/*         onChange={handleFile} */}
+                        {/*     /> */}
+                        {/* </Form.Group> */}
                         <Form.Group controlId="formFileSm" className="mb-3">
                             <Form.Label>Choose an InDesign package...</Form.Label>
                             <Form.Control

@@ -44,11 +44,7 @@ function App() {
                         {
                             id: job.data.jobId,
                             name: job.data.jobName,
-                            files: {
-                                csv: job.data.files[0].filename,
-                                indd: job.data.files[1].filename,
-                                pdf: job.data.pdfPath
-                            },
+                            files: [job.data.zipFile.filename].concat(job.data.pdfFiles),
                             status: job.finishedOn ? 'Complete' : 'Pending',
                             showIcons: job.finishedOn ? true : false,
                         }
@@ -75,6 +71,7 @@ function App() {
                         setJobs(jobs.map((mjob) => {
                             if (mjob.id === job.data.jobId) {
                                 // This job is completed.
+                                mjob.files = [job.data.zipFile.filename].concat(job.data.pdfFiles)
                                 mjob.status = 'Complete'
                                 mjob.showIcons = true;
                             }
@@ -110,16 +107,14 @@ function App() {
     const handleUploadClose = () => setUploadShow(false)
 
     //  Upload the files selected
-    const uploadFiles = (theFiles) => {
+    const uploadFiles = (zipFile) => {
         // {{{ Sends the files to the API
         return new Promise((resolve, reject) => {
 
-            // Upload the files here.
+            // Object to pass with request
             const newFileData = new FormData();
-            for (let eaFile of theFiles) {
-                newFileData.append('file', eaFile)
-            }
 
+            newFileData.append('zipFile', zipFile)
 
             // Make UID for the job
             const uid = Date.now().toString(36) + Math.floor(Math.pow(10, 12) + Math.random() * 9 * Math.pow(10, 12)).toString(36)
@@ -147,7 +142,7 @@ function App() {
     //  User submits the new job
     const handleSubmit = () => {
         // {{{ User submits the job
-        if (csvFile === undefined || indsFile === undefined) {
+        if (indsFile === undefined) {
             // Tell the user to upload something
             alert("Upload files first...")
             return;
@@ -162,24 +157,20 @@ function App() {
         console.log("Files to upload:", csvFile, indsFile)
 
         // Send the files to the api...
-        uploadFiles([csvFile, indsFile])
+        uploadFiles(indsFile)
             .then((res) => {
 
                 console.log("DONE UPLOADING! job:")
-                console.log(res.job)
+                console.log(res)
 
                 setUploadShow(false);
 
-                // Add job to the UI job queue
+
                 setJobs([
                     {
                         id: res.job.jobId,
                         name: res.job.jobName,
-                        files: {
-                            csv: res.job.files[0].filename,
-                            indd: res.job.files[1].filename,
-                            pdf: res.job.pdfPath
-                        },
+                        files: [],
                         status: 'Pending',
                         showIcons: false,
                     },

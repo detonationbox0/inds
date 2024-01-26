@@ -3,7 +3,7 @@ import { Easel } from 'react-bootstrap-icons'
 import { FilePdf } from 'react-bootstrap-icons'
 import Button from 'react-bootstrap/Button'
 
-const JobActions = ({ csvPath, inddPath, pdfPath }) => {
+const JobActions = ({ files }) => {
 
     const downloadFile = (e) => {
         const options = {
@@ -39,22 +39,38 @@ const JobActions = ({ csvPath, inddPath, pdfPath }) => {
             })
     }
 
+    // Count the number of CSVs for Download button names
+    let csvCount = 1;
+
     return (
         <>
-            <Button className="mx-2" size="sm" value={csvPath}
-                onClick={downloadFile}>
-                <FiletypeCsv /> Download CSV
-            </Button>
-            <Button className="mx-2" size="sm" value={inddPath}
-                onClick={downloadFile}>
-                <Easel /> Download Artwork
-            </Button>
-            <Button className="mx-2" size="sm" value={pdfPath}
-                onClick={downloadFile}>
-                <FilePdf /> Download Print
-            </Button>
+            {files.map((file) => {
+                let fileExt = file.split(".").pop();
+                if (fileExt === "zip") {
+                    return (
+                        <Button key={file} className="m-2" size="sm" value={file}
+                            onClick={downloadFile}>
+                            <Easel /> Download Artwork
+                        </Button>
+                    )
+                } else {
+                    csvCount++;
+                    return (
+                        <Button key={file} className="m-2" size="sm" value={file}
+                            onClick={downloadFile}>
+                            <FilePdf /> Download Print {csvCount - 1}
+                        </Button>
+                    )
+                }
+            })}
         </>
     )
 }
 
 export default JobActions
+/*
+                    <Button className="mx-2" size="sm" value={csvPath}
+                        onClick={downloadFile}>
+                        <FiletypeCsv /> Download CSV
+                    </Button>
+*/
