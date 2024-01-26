@@ -11,3 +11,4 @@ inds-frontend/node_modules
 inds-frontend/.env
 inds-frontend/.DS_Store
 
+**/example files/
