@@ -24,4 +24,4 @@ dist-ssr
 *.sln
 *.sw?
 
-example files/
+**/example files/
