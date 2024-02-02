@@ -3,7 +3,7 @@ require('dotenv').config()
 const Queue = require('bull');
 const myQueue = new Queue('indsQueue');
 const { XMLParser } = require('fast-xml-parser')
-
+const axios = require('axios');
 
 myQueue.process((job, done) => {
 
@@ -33,34 +33,74 @@ myQueue.process((job, done) => {
     `
     console.log(xml);
 
-    let options = {
-        method: 'POST',
-        body: xml,
-        headers: {
-            'Content-Type': 'text/xml;charset=utf-8',
-            'Accept-Encoding': 'gzip,deflate',
-            'Content-Length': xml.length,
-            'Connection': 'keep-alive'
-            // 'SOAPAction':"http://Main.Service/AUserService/GetUsers"
-        }
-    }
-    fetch('http://localhost:18383/service?wsdl', options)
-        .then((res) => res.text())
-        .then((res) => {
+    // Fetch has a short and unconfigurable timeout.
+    // There doesn't appear to be any way to increase that timeout, 
+    // as it is defined by the browser:
+    // https://github.com/nodejs/node/issues/46375
+    //
+    // Since these merges can take > 5 mintes, we'll use 
+    // axios instead.
+    //
+    axios.post("http://localhost:18383/service?wsdl", xml, {
+        timout: 3600000 // 1 hour timeout
+        // timeout: 28800000 // 8 hour timeout
+    })
+        .then(response => {
             // Response is XML SOAP that includes the names of the PDF output files
             const parser = new XMLParser();
-            let pXml = parser.parse(res)
+            let pXml = parser.parse(response.data)
             console.dir(pXml, { depth: null, colors: true })
             let pdfFiles = pXml['SOAP-ENV:Envelope']['SOAP-ENV:Body']['IDSP:RunScriptResponse']
                 .scriptResult
                 .data
                 .item
-            pdfFiles = pdfFiles.map(obj => obj.data)
+            if (Array.isArray(pdfFiles)) {
+                pdfFiles = pdfFiles.map(obj => obj.data)
+            } else {
+                pdfFiles = [pdfFiles.data]
+            }
             console.log(pdfFiles)
             job.update({ ...job.data, pdfFiles: pdfFiles })
             job.progress = 100;
             done();
         })
+
+    // OLD WAY:
+    //
+    // let options = {
+    //     hostname: 'http://localhost/',
+    //     port: 18383,
+    //     path: 'service?wsdl',
+    //     method: 'POST',
+    //     body: xml,
+    //     headers: {
+    //         'Content-Type': 'text/xml;charset=utf-8',
+    //         'Accept-Encoding': 'gzip,deflate',
+    //         'Content-Length': xml.length,
+    //         'Connection': 'keep-alive'
+    //     }
+    // }
+    // fetch('http://localhost:18383/service?wsdl', options)
+    //     .then((res) => res.text())
+    //     .then((res) => {
+    //         // Response is XML SOAP that includes the names of the PDF output files
+    //         const parser = new XMLParser();
+    //         let pXml = parser.parse(res)
+    //         console.dir(pXml, { depth: null, colors: true })
+    //         let pdfFiles = pXml['SOAP-ENV:Envelope']['SOAP-ENV:Body']['IDSP:RunScriptResponse']
+    //             .scriptResult
+    //             .data
+    //             .item
+    //         if (Array.isArray(pdfFiles)) {
+    //             pdfFiles = pdfFiles.map(obj => obj.data)
+    //         } else {
+    //             pdfFiles = [pdfFiles.data]
+    //         }
+    //         console.log(pdfFiles)
+    //         job.update({ ...job.data, pdfFiles: pdfFiles })
+    //         job.progress = 100;
+    //         done();
+    //     })
 
 })
 

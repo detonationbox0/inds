@@ -207,10 +207,11 @@ function App() {
                 <Row>
                     {/* Header */}
                     <Col>
-                        <h1>InDesign Server Job Queue</h1>
+                        <h1 className="my-4">InDesign Server Job Queue</h1>
+
                     </Col>
                 </Row>
-                <Row>
+                <Row >
                     {/* Body */}
                     <Col>
                         <JobTable jobs={jobs} />

@@ -24,7 +24,7 @@ const JobTable = ({ jobs }) => {
                                 <td width="500px">
                                     { /* Only show JobActions if job.status != "Pending" */}
                                     {job.showIcons && <JobActions
-                                        files={job.files}
+                                        files={job.files.sort()}
                                     />}
                                 </td>
                             </tr>

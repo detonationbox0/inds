@@ -55,10 +55,9 @@ app.post('/api/upload', upload.single('zipFile'), async (req, res) => {
 
 });
 
-app.get('/api/jobStatus', (_req, res) => {
-    myQueue.getJobs(['completed']).then(jobs => {
-        res.json(jobs)
-    })
+app.get('/api/jobStatus', async (_req, res) => {
+    let jobs = await myQueue.getJobs(['completed'])
+    res.json(jobs)
 })
 
 app.get('/api/allJobs', async (_req, res) => {
