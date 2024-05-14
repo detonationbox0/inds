@@ -1,3 +1,4 @@
+//test
 var zipPath = app.scriptArgs.getValue("zipFile");
 var zipFile = new File(zipPath)
 
